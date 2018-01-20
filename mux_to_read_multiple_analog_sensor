@@ -63,7 +63,7 @@ void loop() {
   else
   {
 
-    //No obstacle on the Rail line
+   Serial.println("No obstacle on the Rail line");
    Serial.println("Completely close the gate");
    Serial.println("Send message to driver: Clear to go");
    obstacleldrRead=0;
