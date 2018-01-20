@@ -1,0 +1,144 @@
+
+//------------------------------Defining required pins----------------------------------//
+
+#define MUX_A D2
+#define MUX_B D3
+#define ANALOG_INPUT A0
+
+
+//-----------------------------Defining required variables------------------------------//
+
+volatile int sensorValue;
+int closingldrValue=0;
+int openingldrValue=0;
+int obstacleldrValue=0;
+
+// Reading only closingldr until it senses train (1:read; 0:no need to read) 
+
+int closingldrRead=1;
+int obstacleldrRead=0;
+int openingldrRead=0;
+int gateStatus=0;
+
+//----------------------------Setup function--------------------------------------------//
+
+void setup() {
+  
+  Serial.begin(115200);
+  //Deifne output pins for Mux
+  pinMode(MUX_A, OUTPUT);
+  pinMode(MUX_B, OUTPUT);          
+}
+
+
+//---------------------------Main Loop---------------------------------------------------//
+
+void loop() {
+  
+
+  if (closingldrRead==1){
+  closingldrValue=gateClosingLDR();
+  Serial.print("closingldrValue:");
+  Serial.println(closingldrValue);
+  if (closingldrValue<600)//Approaching train detected
+  
+  {
+  Serial.println("Train approaching railgate");
+  closingldrRead=0;
+  obstacleldrRead=1;
+  }}
+
+  if (obstacleldrRead==1){
+  
+  obstacleldrValue=obstaclSensigLDR();
+  Serial.print("obstacleldrValue:");
+  Serial.println(obstacleldrValue);
+  
+  if (obstacleldrValue<600)// Obstacle detected
+
+  {
+    Serial.println("Half close gate");
+    Serial.println("Send message to driver: Obstacle ahead");
+  }
+  else
+  {
+
+    //No obstacle on the Rail line
+   Serial.println("Completely close the gate");
+   Serial.println("Send message to driver: Clear to go");
+   obstacleldrRead=0;
+   openingldrRead=1;
+  
+  }}
+
+  if (openingldrRead==1){
+   openingldrValue=gateOpeningLDR();
+   Serial.print("openingldrValue:");
+   Serial.println(openingldrValue);
+   if(openingldrValue<600)//Departing train detected
+  { 
+    Serial.println("Departing train detected");
+    gateStatus=1;
+  
+  }}
+  
+  if (gateStatus==1 && openingldrValue>600)
+  {
+
+      Serial.println("Train departed;open the gate");
+      closingldrRead=1;
+      openingldrRead=0;
+      gateStatus=0;
+      
+      
+    }
+  
+}
+
+
+
+int gateClosingLDR(){
+
+//for(int j=0;j<50;j++){
+  changeMux(1,0);
+  sensorValue = analogRead(ANALOG_INPUT); 
+  //Serial.print("Obstacle sensing LDR value:");
+  //Serial.println(sensorValue);
+  delay(1000);
+  return sensorValue;
+  
+  //}
+}
+
+int obstaclSensigLDR(){
+//for(int k=0;k<50;k++){
+  changeMux(1,1);
+  sensorValue = analogRead(ANALOG_INPUT); 
+  //Serial.print("Gate closing LDR value:");
+  //Serial.println(sensorValue);
+  delay(1000);
+  
+  return sensorValue;
+  
+  //}
+}
+
+int gateOpeningLDR()
+
+{ 
+//for(int i=0;i<50;i++){
+  changeMux(0,0);
+  sensorValue = analogRead(ANALOG_INPUT);
+  //Serial.print("Gate opening LDR value:");
+  //Serial.println(sensorValue);
+  delay(1000);
+  return sensorValue;
+  
+  
+  //}
+}
+void changeMux(int b, int a) {
+  digitalWrite(MUX_B, b);
+  digitalWrite(MUX_A, a);
+  
+}
