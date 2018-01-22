@@ -1,4 +1,4 @@
-//-----------------------------Including Servo Libraries-------------------------------//
+//-----------------------------Including Servo Library-------------------------------//
 
 #include <Servo.h>
 Servo gate1;
