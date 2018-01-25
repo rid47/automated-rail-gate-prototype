@@ -8,7 +8,7 @@ SoftwareSerial BTserial(2,3); // RX | TX
 //----------------------Defining variables-------------------------------------//
 
 char rc;
-const int Train_switch;
+//const int Train_switch;
 
 
 //---------------------Setup--------------------------------------------------//
